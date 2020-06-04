@@ -60,7 +60,6 @@ def maxScore(rolledDice):
         if num in run:
             run.pop(run.index(num))
     score += len(run) ** 2
-    print('the score is',score)
     return rolledDice
 
 #----------------------------------#
@@ -94,10 +93,8 @@ def inputs():
         while dice.isdigit() == False or int(dice) < 6 or int(dice) > 10:
             dice = inputbox.ask(win, 'Invalid input. Input number of dice from 6-10: ')
         dice = int(dice)
-        print('DICE', dice)
         win.fill(BLUE)
-        roll =  rollDice(dice)
-        print(roll)
+        roll = rollDice(dice)
         playTo = inputbox.ask(win, 'Score to play to: ')
         while playTo.isdigit() == False:
             playTo = inputbox.ask(win, 'Invalid input. Input score to play to: ')
@@ -197,17 +194,26 @@ def drawWin():
                 if x >=590:
                     x=15
                     y+=110
-        txtSurface = titleFont.render('Player '+str((currentPlayer + 1)), True, BLACK)
+        if finalP == []:
+            txtSurface = titleFont.render('Player '+str((currentPlayer + 1)), True, BLACK)
+        else:
+            txtSurface = titleFont.render('Player '+str(finalP[currentP]), True, BLACK)
         win.blit(txtSurface, ((700 - txtSurface.get_width()) // 2, 50))
         inputs()
     if isScoreScreen:
-        
         y = 50
-        for i,score in enumerate(scores):
-            txtSurface = txtFont.render('Player '+str(i + 1) + ' score: ' + str(score),True, BLACK)
+        for i,pScore in enumerate(scores):
+            txtSurface = txtFont.render('Player '+str(i + 1) + ' score: ' + str(pScore),True, BLACK)
             win.blit(txtSurface, ((700 - txtSurface.get_width()) // 2, y))
             y += 25
         drawNextBtn(nextBtn)
+    if isWinScreen:
+        win.fill(BLUE)
+        if finalP == []:
+            txtSurface = titleFont.render('Winner: ' + str(scores.index(max(scores)) + 1), True, BLACK)
+        else:
+            txtSurface = titleFont.render('Winner: ' + str(finalP[scores.index(max(scores)) + 1]), True, BLACK)
+        win.blit(txtSurface, ((700 - txtSurface.get_width()) // 2, 200))
             
             
                     
@@ -231,6 +237,8 @@ playTo = 0
 scores = []
 dImages = loadDiceImages()
 guess = 0
+finalP = []
+highScore = 0
 
 
 # Game screens #
@@ -238,7 +246,7 @@ isMainScreen = True
 isInputScreen = False
 isGameScreen = False
 isScoreScreen = False
-
+isWinScreen = False
 
 win = pygame.display.set_mode((700,480))
 inPlay = True
@@ -250,10 +258,9 @@ while inPlay:
             roll = maxScore(roll)
             if stopCheck == True:
                 break
-        print('score',score)
-        if score == guess:
+        if int(score) == int(guess):
             scores[currentPlayer] += score
-        score = 0
+            score = 0
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             inPlay = False
@@ -272,7 +279,20 @@ while inPlay:
                     if currentPlayer > players-1:
                         currentPlayer = 0
                     roll =  rollDice(dice)
-                    print(roll)
+                    score = 0
+                    highScore = max(scores)
+                    if highScore >= playTo:
+                        if scores.count(highScore) > 1:
+                            for p in scores:
+                                if p == highScore:
+                                   finalP.append(index(p))
+                            scores = []
+                            for p in range(len(finalP)):
+                                scores.append(highScore)
+                            players = len(scores)
+                        else:
+                            isWinScreen = True
+                            isScoreScreen = False
                     isScoreScreen = False
                     isGameScreen = True
     
